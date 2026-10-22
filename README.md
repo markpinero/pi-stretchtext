@@ -30,6 +30,7 @@ In regular mode the keyboard shortcuts below still work.
 |---|---|---|
 | Open a stretch | click its underlined short form | `alt+o`, then its letter |
 | Close a stretch | click the « after it | `alt+c`, then its letter |
+| Open all in the latest reply (or close all) | | `alt+a` |
 
 ## License
 
