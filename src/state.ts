@@ -5,7 +5,7 @@ import { hueAfter } from "./palette.ts";
 import { readNote } from "./prompt.ts";
 import { nameIn, nameOf } from "./target.ts";
 import type { Target } from "./target.ts";
-import { drawnAs, isLinkable, parentOf, parse, stretches } from "./parse.ts";
+import { drawnAs, isLinkable, parentOf, parse } from "./parse.ts";
 import type { Segment, Stretch } from "./parse.ts";
 
 const LETTERS = "asdfghjklqwertyuiopzxcvbnm";
@@ -122,7 +122,7 @@ export const takeReadNote = (): Change<Option<string>> =>
 function readNoteFor(state: StretchState): Option<string> {
 	const written = state.replies
 		.slice(state.repliesAtPrompt)
-		.flatMap((reply) => stretches(parse(reply)).filter(isLinkable))
+		.flatMap((reply) => parse(reply).filter((segment) => typeof segment !== "string").filter(isLinkable))
 		.map((stretch) => stretch.short.trim());
 	const opened = [...state.read];
 	if (opened.length === 0 && written.length === 0) return Option.none;
@@ -148,8 +148,8 @@ function letteringFor(state: StretchState, mode: Mode): Lettering {
 function reachable(state: StretchState, reply: string, segments: readonly Segment[]): Stretch[] {
 	return segments.flatMap((segment) => {
 		if (typeof segment === "string") return [];
-		const isShown = drawnAs(segment) === "open" || isOpen(state, reply, segment.key);
-		return [segment, ...(isShown ? reachable(state, reply, segment.long.getOrElse([])) : [])];
+		// One layer only: an open stretch's long form holds nothing to open; a long form shown open still does.
+		return drawnAs(segment) === "open" ? reachable(state, reply, segment.long.getOrElse([])) : [segment];
 	});
 }
 

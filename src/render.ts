@@ -46,12 +46,25 @@ function drawLink(state: StretchState, { links, theme }: Canvas, target: Target)
 		target.stretch.short,
 		target.stretch.long.getOrElse([]),
 		growth.map((growth) => easeInOut(growth.progress)).getOrElse(1),
-		(nested) => draw(state, { links, theme }, target.reply, [nested]),
-		wordsPaint(theme, hue, state.newest.is(name)),
+		// One layer only: a stretch inside a long form is drawn as plain text, already open.
+		(nested) => flat([nested]),
+		paintExceptMarkers(wordsPaint(theme, hue, state.newest.is(name))),
 	);
 	// While it grows or shrinks, a stretch has no « to click.
 	return growth.isSome ? long : `${long} ${letter(state, name, "close")}${links.link(target, closerPaint(theme, hue)("«"))}`;
 }
+
+/** A list marker stays unpainted, so Markdown still reads it as one. */
+const paintExceptMarkers =
+	(paint: (word: string) => string) =>
+	(word: string): string =>
+		/^([-*+]|\d+[.)])$/.test(word) ? word : paint(word);
+
+/** Segments as plain text, every stretch in them drawn as its long form. */
+const flat = (segments: readonly Segment[]): string =>
+	segments
+		.map((segment) => (typeof segment === "string" ? segment : drawnAs(segment) === "text" ? segment.short : flat(segment.long.getOrElse([]))))
+		.join("");
 
 /** The letter over a stretch while letters for `mode` show, or "". */
 function letter(state: StretchState, name: string, mode: Mode): string {

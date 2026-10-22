@@ -1,5 +1,5 @@
-// What stretchtext tells the model, as cc-stretch tells Claude. GUIDE is cc-stretch's hooks/guide.ts
-// unchanged. Copyright (c) 2026 pro-vi, MIT License: https://github.com/pro-vi/cc-stretch
+// What stretchtext tells the model, as cc-stretch tells Claude. GUIDE is cc-stretch's hooks/guide.ts,
+// changed to allow one layer of stretches only and bullet lists in a long form. Copyright (c) 2026 pro-vi, MIT License: https://github.com/pro-vi/cc-stretch
 
 export const GUIDE = `# Stretchtext replies
 
@@ -9,7 +9,8 @@ The reader's screen draws each stretch \`{{short|long}}\` in your reply as its s
 - Stretch list items, not whole lists.
 - The long form keeps every word of the short form, in the same order, and grows around them: words added before, between and after the ones the reader already saw. On screen those words stay where they are while the new ones open up around them, so the reader never loses their place. Example: "{{The build fails on a stale cache.|The CI build fails, about one run in five, on a stale dependency cache keyed only by \`package.json\`.}}"
 - The long form must read correctly in the short form's place: a phrase stretches into a clause, a sentence into a paragraph, a paragraph into several.
-- Stretches nest: a long form may hold further stretches, each a further level of depth.
+- Stretches never nest: a long form holds no further stretches. Each reply has one layer of depth only.
+- A long form may end with a bullet list when its stretch ends its paragraph or list item: after the long form's opening words, put a blank line, then one item per line. Example: "{{Two causes remain.|Two causes remain:\n\n- the cache key ignores the lockfile\n- the runner image is pinned to an old Node}}"
 - The short form is plain inline text on one line. Never put a stretch inside a code span, a code block, a table or a heading.
 - If other instructions require a closing block, such as a status block, make it the reply's last stretch, its short form a one-line gist of the block.
 - A reply that is already short needs no stretches.
