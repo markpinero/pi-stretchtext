@@ -5,40 +5,26 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-import { Animator } from "./src/animation.ts";
 import { LinkTable } from "./src/links.ts";
 import { Store } from "./src/monad.ts";
 import { onMarkdownClick } from "./src/mouse.ts";
 import { GUIDE } from "./src/prompt.ts";
 import { draw } from "./src/render.ts";
 import { Screen } from "./src/screen.ts";
-import { initialState, pickLetter, remember, setGrowth, settle, startLettering, takeReadNote, toggle } from "./src/state.ts";
+import { initialState, pickLetter, remember, settle, startLettering, takeReadNote, toggle } from "./src/state.ts";
 import type { Mode } from "./src/state.ts";
-import { nameOf } from "./src/target.ts";
 import type { Target } from "./src/target.ts";
-import { lengthOf } from "./src/grow.ts";
 import { parse, stretches } from "./src/parse.ts";
-
-/** How long a stretch takes to grow or shrink: longer for a longer long form, as in cc-stretch. */
-const secondsFor = (target: Target) => Math.min(1.4, 0.45 + lengthOf(target.stretch.long.getOrElse([])) / 70);
 
 export default function stretchtext(pi: ExtensionAPI) {
 	const screen = new Screen();
 	const store = new Store(initialState, () => screen.redraw());
 	const links = new LinkTable();
-	const animator = new Animator();
 
-	/** Opens a closed stretch or closes an open one, growing or shrinking it in place. */
+	/** Opens a closed stretch or closes an open one, at once: no grow or shrink animation. */
 	function toggleStretch(target: Target) {
 		const isOpening = store.run(toggle(target));
-		const name = nameOf(target);
-		animator.run({
-			from: isOpening ? 0 : 1,
-			to: isOpening ? 1 : 0,
-			seconds: secondsFor(target),
-			frame: (progress) => store.run(setGrowth(name, progress)),
-			done: () => store.run(settle(target, isOpening)),
-		});
+		store.run(settle(target, isOpening));
 	}
 
 	function askForLetter(ctx: ExtensionContext, mode: Mode) {
@@ -95,8 +81,6 @@ export default function stretchtext(pi: ExtensionAPI) {
 			{ placement: "belowEditor" },
 		);
 	});
-
-	pi.on("session_shutdown", () => animator.stop());
 
 	pi.registerShortcut("alt+o", {
 		description: "stretchtext: letters over closed stretches, to open one",
