@@ -1,6 +1,5 @@
-// The colours open stretches take in turn, read from Pi's theme, so they follow it, light or dark,
-// and change with it. The order is cc-stretch's: yellow, violet, green, then blue. Each open stretch
-// keeps its colour; all but the newest take a faded form of it, mixed 35% toward the theme's
+// The colour open stretches take, read from Pi's theme, so it follows it, light or dark, and changes
+// with it. Every stretch takes the theme's accent; all but the newest take a faded form of it, mixed 35% toward the theme's
 // background side, quieter but still that colour. Before Pi hands over its theme, stretches are drawn
 // without colour.
 
@@ -11,7 +10,7 @@ import type { Option } from "./monad.ts";
 
 type Paint = (text: string) => string;
 
-const COLOURS: readonly ThemeColor[] = ["warning", "accent", "success", "mdLink"];
+const COLOURS: readonly ThemeColor[] = ["accent"];
 const FADE = 0.35;
 
 const colourAt = (count: number) => COLOURS[count % COLOURS.length]!;
